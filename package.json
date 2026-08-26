@@ -13,5 +13,9 @@
     "prettier": "^3.9.6",
     "typescript": "~6.0.2",
     "vite": "^8.2.2"
+  },
+  "exports": {
+    "./jsx-runtime": "./src/jsx-runtime.ts",
+    "./jsx-dev-runtime": "./src/jsx-dev-runtime.ts"
   }
 }

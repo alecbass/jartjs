@@ -1,10 +1,14 @@
-import './style.css'
-import heroImg from './assets/hero.png'
-import typescriptLogo from './assets/typescript.svg'
-import viteLogo from './assets/vite.svg'
-import { setupCounter } from './counter.ts'
+import "./style.css";
+import heroImg from "./assets/hero.png";
+import typescriptLogo from "./assets/typescript.svg";
+import viteLogo from "./assets/vite.svg";
+import { setupCounter } from "./counter.ts";
+import { Component } from "./component.tsx";
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
+const container = <Component />;
+console.debug(container);
+
+document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 <section id="center">
   <div class="hero">
     <img src="${heroImg}" class="base" width="170" height="179">
@@ -13,7 +17,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   </div>
   <div>
     <h1>Get started</h1>
-    <p>Edit <code>src/main.ts</code> and save to test <code>HMR</code></p>
+    <p>Edit <code>src/main.tsx</code> and save to test <code>HMR</code></p>
   </div>
   <button id="counter" type="button" class="counter"></button>
 </section>
@@ -55,6 +59,6 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 
 <div class="ticks"></div>
 <section id="spacer"></section>
-`
+`;
 
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+setupCounter(document.querySelector<HTMLButtonElement>("#counter")!);
