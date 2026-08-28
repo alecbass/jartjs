@@ -3,10 +3,16 @@ import heroImg from "./assets/hero.png";
 import typescriptLogo from "./assets/typescript.svg";
 import viteLogo from "./assets/vite.svg";
 import { setupCounter } from "./counter.ts";
-import { Component } from "./component.tsx";
 
-const container = <Component />;
-console.debug(container);
+const divJsx = (
+  <div title="Div">
+    First bit of text
+    <div title="Child" />
+    <div title="Second child" />
+    Second bit of text
+  </div>
+);
+console.debug(divJsx);
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 <section id="center">
