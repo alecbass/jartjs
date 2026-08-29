@@ -13,6 +13,9 @@ type JsxChildren = JsxNode | JsxNode[];
 interface JsxChildrenProps {
   /** Direct child text, a single JSX element or multiple JSX elements. */
   children?: JsxChildren;
+
+  /** Specific style override to allow partial style declarations. */
+  style?: Partial<CSSStyleDeclaration>;
 }
 
 export interface VirtualElement<Key> {
@@ -20,12 +23,12 @@ export interface VirtualElement<Key> {
   tagName: Key;
   props: Key extends keyof HTMLElementTagNameMap
     ? HTMLElementTagNameMap[Key]
-    : unknown;
+    : Record<string, unknown>;
   children: JsxChildren;
 }
 
 /** Normal HTML or SVG element props, with manual JSX ones pruned out. Children are handled explicitly. */
-type JsxProps<ElementTag> = Partial<Omit<ElementTag, "children">> &
+type JsxProps<ElementTag> = Partial<Omit<ElementTag, "children" | "style">> &
   JsxChildrenProps;
 
 declare global {
@@ -43,15 +46,25 @@ declare global {
 
 export type Fragment = VirtualElement<"fragment">;
 
+const applyProps = (element: Element, props: Record<string, unknown>): void => {
+  const { style, ...rest } = props;
+  Object.assign(element, rest);
+
+  if (element instanceof HTMLElement) {
+    // Inline styles must be added via a props spread like `element.style = props.style`;
+    Object.assign(element.style, style);
+  }
+};
+
 /**
- * Turns a single JSX element into a real element, or text node.
- *
+ * Turns a single JSX element into a real DOM element, or text node.
+ * Recursively calls createRealNode on this element's children to create real DOM nodes from them too.
  *
  * @example
  * createRealElement("hello"); === "hello" text node
  * createRealElement(<div />); === HTMLDivElement instance
  */
-export const createRealElement = (virtualElement: JsxNode): Node => {
+export const createRealNode = (virtualElement: JsxNode): Node => {
   const isTextNode = typeof virtualElement === "string";
 
   if (isTextNode) {
@@ -63,13 +76,13 @@ export const createRealElement = (virtualElement: JsxNode): Node => {
   );
 
   // Copy props over
-  Object.assign(element, virtualElement.props);
+  applyProps(element, virtualElement.props);
 
   if (Array.isArray(virtualElement.children)) {
-    const childElements = virtualElement.children.map(createRealElement);
+    const childElements = virtualElement.children.map(createRealNode);
     element.append(...childElements);
   } else {
-    const childElement = createRealElement(virtualElement.children);
+    const childElement = createRealNode(virtualElement.children);
     element.appendChild(childElement);
   }
 
@@ -81,6 +94,8 @@ export const createRealElement = (virtualElement: JsxNode): Node => {
 /*
  * Functions
  */
+
+/** Turns a raw parsed JSX object into a virtual element. */
 export const createVirtualElement = (
   type: string,
   props: { type: string; children?: JsxChildren },
