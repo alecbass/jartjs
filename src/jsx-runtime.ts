@@ -43,7 +43,7 @@ declare global {
 
 export type Fragment = VirtualElement<"fragment">; // TODO(alec): Don't hardcode to a div
 
-const createRealElement = <Key>(
+export const createRealElement = <Key>(
   virtualElement: VirtualElement<Key>,
 ): Element => {
   const element = document.createElement(

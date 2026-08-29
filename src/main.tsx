@@ -3,6 +3,7 @@ import heroImg from "./assets/hero.png";
 import typescriptLogo from "./assets/typescript.svg";
 import viteLogo from "./assets/vite.svg";
 import { setupCounter } from "./counter.ts";
+import { createRealElement } from "cool-web-jsx/jsx-runtime";
 
 const divJsx = (
   <div title="Div">
@@ -12,7 +13,9 @@ const divJsx = (
     Second bit of text
   </div>
 );
-console.debug(divJsx);
+console.debug(divJsx, typeof divJsx);
+const realDiv = createRealElement(divJsx);
+console.debug(realDiv);
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 <section id="center">
@@ -68,3 +71,5 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 `;
 
 setupCounter(document.querySelector<HTMLButtonElement>("#counter")!);
+
+document.querySelector("section")?.appendChild(realDiv);
