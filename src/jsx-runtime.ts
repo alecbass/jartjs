@@ -41,17 +41,39 @@ declare global {
   }
 }
 
-export type Fragment = VirtualElement<"fragment">; // TODO(alec): Don't hardcode to a div
+export type Fragment = VirtualElement<"fragment">;
 
-export const createRealElement = <Key>(
-  virtualElement: VirtualElement<Key>,
-): Element => {
+/**
+ * Turns a single JSX element into a real element, or text node.
+ *
+ *
+ * @example
+ * createRealElement("hello"); === "hello" text node
+ * createRealElement(<div />); === HTMLDivElement instance
+ */
+export const createRealElement = (virtualElement: JsxNode): Node => {
+  const isTextNode = typeof virtualElement === "string";
+
+  if (isTextNode) {
+    return document.createTextNode(virtualElement);
+  }
+
   const element = document.createElement(
     virtualElement.tagName as keyof HTMLElementTagNameMap,
   );
 
   // Copy props over
   Object.assign(element, virtualElement.props);
+
+  if (Array.isArray(virtualElement.children)) {
+    const childElements = virtualElement.children.map(createRealElement);
+    element.append(...childElements);
+  } else {
+    const childElement = createRealElement(virtualElement.children);
+    element.appendChild(childElement);
+  }
+
+  console.debug(element, virtualElement);
 
   return element;
 };
@@ -63,7 +85,6 @@ export const createVirtualElement = (
   type: string,
   props: { type: string; children?: JsxChildren },
 ): VirtualElement<string> => {
-  console.debug(type, props);
   const { children, ...rest } = props;
 
   return {

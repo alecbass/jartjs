@@ -6,16 +6,16 @@ import { setupCounter } from "./counter.ts";
 import { createRealElement } from "cool-web-jsx/jsx-runtime";
 
 const divJsx = (
-  <div title="Div">
+  <div title="Div" style={{ display: "flex" }}>
     First bit of text
     <div title="Child" />
-    <div title="Second child" />
+    <div title="Second child">
+      <span>Child of the second element</span>
+    </div>
     Second bit of text
   </div>
 );
-console.debug(divJsx, typeof divJsx);
 const realDiv = createRealElement(divJsx);
-console.debug(realDiv);
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 <section id="center">
