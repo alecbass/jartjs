@@ -4,4 +4,4 @@ An opinionated library which aims to combine web components with JSX for typing,
 
 ### Coming soon!!!!!!!!!
 
-<img src="https://uk.linkedin.com/in/bryan-kassulke-92bb1513a" />
+<img src="./bryan.jpeg" />
