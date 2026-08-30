@@ -2,7 +2,10 @@
  * Types
  */
 
-type ElementType = string;
+type FunctionComponent = (props: unknown) => JsxNode;
+
+/** Raw strings like "div", or a function component. */
+type ElementType = string | FunctionComponent;
 
 /** A single JSX node. */
 type JsxNode = string | number | VirtualElement<string>;
@@ -111,6 +114,17 @@ const createDomNode = (
     return document.createTextNode(virtualElement);
   }
 
+  let children: JsxChildren;
+
+  if (typeof virtualElement.type === "function") {
+    const fcResult = virtualElement.type(
+      virtualElement.props,
+    ) as VirtualElement<"fc">;
+    console.debug(virtualElement);
+    console.debug(fcResult);
+    children = fcResult.children;
+  }
+
   const element = createOrUseExistingNode(
     key,
     virtualElement.tagName as keyof HTMLElementTagNameMap,
@@ -153,14 +167,18 @@ export const createOrUpdateRoot = (
 
 /** Turns a raw parsed JSX object into a virtual element. */
 export const createVirtualElement = (
-  type: string,
+  type: string | FunctionComponent,
   props: { type: string; children?: JsxChildren },
 ): VirtualElement<string> => {
   const { children, ...rest } = props;
+  const tagName =
+    typeof type === "function"
+      ? type.name
+      : (type as keyof HTMLElementTagNameMap);
 
   return {
     type,
-    tagName: type as keyof HTMLElementTagNameMap,
+    tagName,
     props: rest,
     children: children ?? [],
   };

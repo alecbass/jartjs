@@ -4,6 +4,7 @@ import typescriptLogo from "./assets/typescript.svg";
 import viteLogo from "./assets/vite.svg";
 import { setupCounter } from "./counter.ts";
 import { createOrUpdateRoot } from "cool-web-jsx/jsx-runtime";
+import { Component } from "./component.tsx";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 <section id="center">
@@ -86,7 +87,7 @@ const divJsx = (
 
 createOrUpdateRoot(divJsx, centerSection);
 createOrUpdateRoot(<div>Replaced child</div>, centerSection);
-createOrUpdateRoot(<span>Replaced child again</span>, centerSection);
+createOrUpdateRoot(<Component title="Function component" />, centerSection);
 
 const button = document.querySelector("#counter")! as HTMLButtonElement;
 let clickCount = 0;
