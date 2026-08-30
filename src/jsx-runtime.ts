@@ -63,7 +63,7 @@ const applyProps = (element: Element, props: Record<string, unknown>): void => {
   const { style, ...rest } = props;
   Object.assign(element, rest);
 
-  if (element instanceof HTMLElement) {
+  if (element instanceof HTMLElement || element instanceof SVGElement) {
     // Inline styles must be added via a props spread like `element.style = props.style`;
     Object.assign(element.style, style);
   }
