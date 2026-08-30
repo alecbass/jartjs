@@ -4,4 +4,4 @@ An opinionated library which aims to combine web components with JSX for typing,
 
 ### Coming soon!!!!!!!!!
 
-<img src="./bryan.jpeg" />
+![Bry Bry](/public/bryan.jpeg)
