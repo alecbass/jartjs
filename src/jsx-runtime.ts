@@ -5,7 +5,7 @@
 type ElementType = string;
 
 /** A single JSX node. */
-type JsxNode = string | VirtualElement<string>;
+type JsxNode = string | number | VirtualElement<string>;
 
 /** One or multiple JSX nodes that can be used as an element's children. */
 type JsxChildren = JsxNode | JsxNode[];
@@ -77,7 +77,6 @@ const createOrUseExistingNode = (
   const existingChild = parent.querySelector(`[jsx-key="${key}"]`);
 
   if (existingChild) {
-    console.debug("Existing", existingChild);
     return existingChild;
   }
 
@@ -100,6 +99,12 @@ const createDomNode = (
   parentNode: ParentNode,
   key: string,
 ) => {
+  const isNumberNode = typeof virtualElement === "number";
+
+  if (isNumberNode) {
+    return document.createTextNode(virtualElement.toString());
+  }
+
   const isTextNode = typeof virtualElement === "string";
 
   if (isTextNode) {
@@ -122,7 +127,6 @@ const createDomNode = (
   const virtualChildren = Array.isArray(virtualElement.children)
     ? virtualElement.children
     : [virtualElement.children];
-
   const keyGenerator = keyGeneratorFunction();
   const childElements = virtualChildren.map((virtualElement) => {
     const nextKey = keyGenerator.next().value!;

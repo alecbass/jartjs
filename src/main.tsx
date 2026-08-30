@@ -87,3 +87,10 @@ const divJsx = (
 createOrUpdateRoot(divJsx, centerSection);
 createOrUpdateRoot(<div>Replaced child</div>, centerSection);
 createOrUpdateRoot(<span>Replaced child again</span>, centerSection);
+
+const button = document.querySelector("#counter")! as HTMLButtonElement;
+let clickCount = 0;
+
+button.addEventListener("click", () => {
+  createOrUpdateRoot(<div>Clicked {++clickCount} times</div>, centerSection);
+});
