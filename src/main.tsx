@@ -3,7 +3,7 @@ import heroImg from "./assets/hero.png";
 import typescriptLogo from "./assets/typescript.svg";
 import viteLogo from "./assets/vite.svg";
 import { setupCounter } from "./counter.ts";
-import { createRealNode } from "cool-web-jsx/jsx-runtime";
+import { createRealNode, createRoot } from "cool-web-jsx/jsx-runtime";
 
 const divJsx = (
   <div
@@ -25,8 +25,6 @@ const divJsx = (
     Second bit of text
   </div>
 );
-const realDiv = createRealNode(divJsx);
-
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 <section id="center">
   <div class="hero">
@@ -82,4 +80,8 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 
 setupCounter(document.querySelector<HTMLButtonElement>("#counter")!);
 
+const centerSection = document.querySelector("#center")!;
+const realDiv = createRoot(divJsx, centerSection);
 document.querySelector("section")?.appendChild(realDiv);
+
+createRealNode(<div>lol</div>, centerSection);

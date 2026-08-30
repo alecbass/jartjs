@@ -25,6 +25,7 @@ export interface VirtualElement<Key> {
     ? HTMLElementTagNameMap[Key]
     : Record<string, unknown>;
   children: JsxChildren;
+  key: string;
 }
 
 /** Normal HTML or SVG element props, with manual JSX ones pruned out. Children are handled explicitly. */
@@ -46,6 +47,33 @@ declare global {
 
 export type Fragment = VirtualElement<"fragment">;
 
+/*
+ * Functions
+ */
+
+function* keyGeneratorFunction(): Generator<number, void, unknown> {
+  let id = 0;
+
+  while (true) {
+    yield ++id;
+  }
+}
+
+const parentKeyGenerator = keyGeneratorFunction();
+
+const setOrUseKey = (element: Element): string => {
+  const existingKey = element.getAttribute("jsx-key")!;
+
+  if (existingKey) {
+    return existingKey;
+  }
+
+  const key = parentKeyGenerator.next().value!.toString();
+  element.setAttribute("jsx-key", key);
+
+  return key;
+};
+
 const applyProps = (element: Element, props: Record<string, unknown>): void => {
   const { style, ...rest } = props;
   Object.assign(element, rest);
@@ -56,6 +84,22 @@ const applyProps = (element: Element, props: Record<string, unknown>): void => {
   }
 };
 
+const createOrUseExistingNode = (
+  key: string,
+  tagName: keyof HTMLElementTagNameMap,
+  parent: ParentNode,
+): Element => {
+  const existingChild = parent.querySelector(`[jsx-key="${key}"]`);
+
+  if (existingChild) {
+    console.debug("Existing", existingChild);
+  } else {
+    console.debug("new");
+  }
+
+  return existingChild ?? document.createElement(tagName);
+};
+
 /**
  * Turns a single JSX element into a real DOM element, or text node.
  * Recursively calls createRealNode on this element's children to create real DOM nodes from them too.
@@ -64,36 +108,49 @@ const applyProps = (element: Element, props: Record<string, unknown>): void => {
  * createRealElement("hello"); === "hello" text node
  * createRealElement(<div />); === HTMLDivElement instance
  */
-export const createRealNode = (virtualElement: JsxNode): Node => {
+export const createRealNode = (
+  virtualElement: JsxNode,
+  parentNode: ParentNode,
+): Node => {
   const isTextNode = typeof virtualElement === "string";
 
   if (isTextNode) {
     return document.createTextNode(virtualElement);
   }
 
-  const element = document.createElement(
+  const element = createOrUseExistingNode(
+    virtualElement.key,
     virtualElement.tagName as keyof HTMLElementTagNameMap,
+    parentNode,
   );
 
   // Copy props over
   applyProps(element, virtualElement.props);
+  element.setAttribute("jsx-key", virtualElement.key);
+
+  //
+  // TODO(alec): Update existing elements here
+  //
 
   if (Array.isArray(virtualElement.children)) {
-    const childElements = virtualElement.children.map(createRealNode);
+    const childElements = virtualElement.children.map((virtualElement) =>
+      createRealNode(virtualElement, element),
+    );
     element.append(...childElements);
   } else {
-    const childElement = createRealNode(virtualElement.children);
+    const childElement = createRealNode(virtualElement.children, element);
     element.appendChild(childElement);
   }
-
-  console.debug(element, virtualElement);
 
   return element;
 };
 
-/*
- * Functions
- */
+/** Top-level function used to turn JSX into child nodes of a parent. */
+export const createRoot = (jsxNode: JsxNode, parentNode: Element): Node => {
+  setOrUseKey(parentNode);
+
+  return createRealNode(jsxNode, parentNode);
+};
 
 /** Turns a raw parsed JSX object into a virtual element. */
 export const createVirtualElement = (
@@ -101,11 +158,13 @@ export const createVirtualElement = (
   props: { type: string; children?: JsxChildren },
 ): VirtualElement<string> => {
   const { children, ...rest } = props;
+  const key = parentKeyGenerator.next().value!.toString();
 
   return {
     type,
     tagName: type as keyof HTMLElementTagNameMap,
     props: rest,
+    key,
     children: children ?? [],
   };
 };
