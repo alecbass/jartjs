@@ -86,4 +86,4 @@ const divJsx = (
 
 createOrUpdateRoot(divJsx, centerSection);
 createOrUpdateRoot(<div>Replaced child</div>, centerSection);
-createOrUpdateRoot(<div>Replaced child again</div>, centerSection);
+createOrUpdateRoot(<span>Replaced child again</span>, centerSection);
