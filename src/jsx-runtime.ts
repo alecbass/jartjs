@@ -92,12 +92,13 @@ const createOrUseExistingNode = (
   const existingChild = parent.querySelector(`[jsx-key="${key}"]`);
 
   if (existingChild) {
-    console.debug("Existing", existingChild);
-  } else {
-    console.debug("new");
+    return existingChild;
   }
 
-  return existingChild ?? document.createElement(tagName);
+  const newElement = document.createElement(tagName);
+  newElement.setAttribute("jsx-key", key);
+
+  return newElement;
 };
 
 /**
@@ -108,10 +109,7 @@ const createOrUseExistingNode = (
  * createRealElement("hello"); === "hello" text node
  * createRealElement(<div />); === HTMLDivElement instance
  */
-export const createRealNode = (
-  virtualElement: JsxNode,
-  parentNode: ParentNode,
-): Node => {
+const createRealNode = (virtualElement: JsxNode, parentNode: ParentNode) => {
   const isTextNode = typeof virtualElement === "string";
 
   if (isTextNode) {
@@ -123,33 +121,38 @@ export const createRealNode = (
     virtualElement.tagName as keyof HTMLElementTagNameMap,
     parentNode,
   );
+  console.debug(element, virtualElement);
 
   // Copy props over
   applyProps(element, virtualElement.props);
-  element.setAttribute("jsx-key", virtualElement.key);
 
   //
-  // TODO(alec): Update existing elements here
+  // TODO(alec): Find the diff between new and existing elements, and update existing ones
   //
 
-  if (Array.isArray(virtualElement.children)) {
-    const childElements = virtualElement.children.map((virtualElement) =>
-      createRealNode(virtualElement, element),
-    );
-    element.append(...childElements);
-  } else {
-    const childElement = createRealNode(virtualElement.children, element);
-    element.appendChild(childElement);
-  }
+  const virtualChildren = Array.isArray(virtualElement.children)
+    ? virtualElement.children
+    : [virtualElement.children];
+
+  const childElements = virtualChildren.map((virtualElement) =>
+    createRealNode(virtualElement, element),
+  );
+  element.append(...childElements);
 
   return element;
 };
 
-/** Top-level function used to turn JSX into child nodes of a parent. */
-export const createRoot = (jsxNode: JsxNode, parentNode: Element): Node => {
-  setOrUseKey(parentNode);
+/**
+ * Top-level function used to turn JSX into child nodes of a parent.
+ * Recursively goes through each JSX child element and adds it as a real DOM element as a child of rootElement, or updates an existing one in-place.
+ */
+export const createOrUpdateRoot = (
+  jsxNode: JsxNode,
+  rootElement: Element,
+): void => {
+  const realNodeRoot = createRealNode(jsxNode, rootElement);
 
-  return createRealNode(jsxNode, parentNode);
+  rootElement.appendChild(realNodeRoot);
 };
 
 /** Turns a raw parsed JSX object into a virtual element. */
@@ -172,15 +175,11 @@ export const createVirtualElement = (
 export const jsx = (
   type: ElementType,
   props: { type: string; children?: JsxChildren },
-): VirtualElement<string> => {
-  return createVirtualElement(type, props);
-};
+): VirtualElement<string> => createVirtualElement(type, props);
 
 export const jsxs = (
   type: ElementType,
   props: { type: string; children?: JsxChildren },
-): VirtualElement<string> => {
-  return jsx(type, props);
-};
+): VirtualElement<string> => jsx(type, props);
 
 export const jsxDEV = jsx;

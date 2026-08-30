@@ -3,28 +3,8 @@ import heroImg from "./assets/hero.png";
 import typescriptLogo from "./assets/typescript.svg";
 import viteLogo from "./assets/vite.svg";
 import { setupCounter } from "./counter.ts";
-import { createRealNode, createRoot } from "cool-web-jsx/jsx-runtime";
+import { createOrUpdateRoot } from "cool-web-jsx/jsx-runtime";
 
-const divJsx = (
-  <div
-    title="Div"
-    className="parent"
-    style={{ display: "flex", color: "#FFFFFF" }}
-  >
-    First bit of text
-    <div title="Child" />
-    <div title="Second child">
-      <span
-        title="Second child element"
-        className="test"
-        style={{ color: "blue" }}
-      >
-        Child of the second element
-      </span>
-    </div>
-    Second bit of text
-  </div>
-);
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 <section id="center">
   <div class="hero">
@@ -81,7 +61,29 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 setupCounter(document.querySelector<HTMLButtonElement>("#counter")!);
 
 const centerSection = document.querySelector("#center")!;
-const realDiv = createRoot(divJsx, centerSection);
-document.querySelector("section")?.appendChild(realDiv);
 
-createRealNode(<div>lol</div>, centerSection);
+const divJsx = (
+  <div
+    id="jsx-root"
+    title="Div"
+    className="parent"
+    style={{ display: "flex", color: "#FFFFFF" }}
+  >
+    First bit of text
+    <div title="Child" />
+    <div title="Second child">
+      <span
+        title="Second child element"
+        className="test"
+        style={{ color: "blue" }}
+      >
+        Child of the second element
+      </span>
+    </div>
+    Second bit of text
+  </div>
+);
+
+createOrUpdateRoot(divJsx, centerSection);
+createOrUpdateRoot(<div>Replaced child</div>, centerSection);
+createOrUpdateRoot(<div>Replaced child again</div>, centerSection);
