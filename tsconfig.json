@@ -23,7 +23,7 @@
 
     /* JSX */
     "jsx": "react-jsx",
-    "jsxImportSource": "cool-web-jsx"
+    "jsxImportSource": "jart-js"
   },
   "include": ["src"]
 }
