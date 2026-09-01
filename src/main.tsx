@@ -3,8 +3,8 @@ import heroImg from "./assets/hero.png";
 import typescriptLogo from "./assets/typescript.svg";
 import viteLogo from "./assets/vite.svg";
 import { setupCounter } from "./counter.ts";
-import { createOrUpdateRoot } from "./jsx-runtime";
-import { Component } from "./component.tsx";
+import { createOrUpdateRoot } from "./jsx-runtime.ts";
+import { Component } from "./Component.tsx";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 <section id="center">
@@ -17,8 +17,9 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <h1>Get started</h1>
     <p>Edit <code>src/main.tsx</code> and save to test <code>HMR</code></p>
   </div>
-  <button id="counter" type="button" class="counter"></button>
 </section>
+
+<button id="counter" type="button" class="counter"></button>
 
 <div class="ticks"></div>
 
@@ -78,7 +79,7 @@ const divJsx = (
         className="test"
         style={{ color: "blue" }}
       >
-        Child of the second element
+        <span>Sub-Child of the second element</span>
       </span>
     </div>
     Second bit of text
@@ -87,7 +88,15 @@ const divJsx = (
 
 createOrUpdateRoot(divJsx, centerSection);
 createOrUpdateRoot(<div>Replaced child</div>, centerSection);
-createOrUpdateRoot(<Component title="Function component" />, centerSection);
+createOrUpdateRoot(
+  <Component
+    title="Function component"
+    renderLastChild={() => <div>This is rendered by a prop function</div>}
+  >
+    yeah
+  </Component>,
+  centerSection,
+);
 
 const button = document.querySelector("#counter")! as HTMLButtonElement;
 let clickCount = 0;

@@ -8,10 +8,10 @@ type FunctionComponent = (props: unknown) => JsxNode;
 type ElementType = string | FunctionComponent;
 
 /** A single JSX node. */
-type JsxNode = string | number | VirtualElement<string>;
+export type JsxNode = string | number | VirtualElement<string>;
 
 /** One or multiple JSX nodes that can be used as an element's children. */
-type JsxChildren = JsxNode | JsxNode[];
+export type JsxChildren = JsxNode | JsxNode[];
 
 interface JsxChildrenProps {
   /** Direct child text, a single JSX element or multiple JSX elements. */
@@ -28,7 +28,6 @@ export interface VirtualElement<Key> {
     ? HTMLElementTagNameMap[Key]
     : Record<string, unknown>;
   children: JsxChildren;
-  // key: string;
 }
 
 /** Normal HTML or SVG element props, with manual JSX ones pruned out. Children are handled explicitly. */
@@ -101,28 +100,51 @@ const createDomNode = (
   virtualElement: JsxNode,
   parentNode: ParentNode,
   key: string,
-) => {
+): Node[] => {
   const isNumberNode = typeof virtualElement === "number";
 
   if (isNumberNode) {
-    return document.createTextNode(virtualElement.toString());
+    return [document.createTextNode(virtualElement.toString())];
   }
 
   const isTextNode = typeof virtualElement === "string";
 
   if (isTextNode) {
-    return document.createTextNode(virtualElement);
+    return [document.createTextNode(virtualElement)];
   }
 
-  let children: JsxChildren;
+  const keyGenerator = keyGeneratorFunction();
 
   if (typeof virtualElement.type === "function") {
+    // Special case: render function component children. The component itself exists in the virtual DOM, but all real
+    // DOM elements will become children of its parent
     const fcResult = virtualElement.type(
       virtualElement.props,
     ) as VirtualElement<"fc">;
-    console.debug(virtualElement);
-    console.debug(fcResult);
-    children = fcResult.children;
+    const children = Array.isArray(fcResult.children)
+      ? fcResult.children
+      : [fcResult.children];
+
+    const childElements = children.flatMap((fcChild) => {
+      if (fcChild === undefined) {
+        // This is the `children` prop. I don't know if this actually will work long-term
+        const propChildren = Array.isArray(virtualElement.children)
+          ? virtualElement.children
+          : [virtualElement.children];
+
+        return propChildren.flatMap((c) => {
+          const nextKey = keyGenerator.next().value!;
+          return createDomNode(c, parentNode, nextKey.toString());
+        });
+      }
+      const nextKey = keyGenerator.next().value!;
+      return createDomNode(fcChild, parentNode, nextKey.toString());
+    });
+
+    // We don't replace children of an element here because there is no element to replace. The function component
+    // doesn't actually map to a real DOM element
+
+    return childElements;
   }
 
   const element = createOrUseExistingNode(
@@ -141,14 +163,17 @@ const createDomNode = (
   const virtualChildren = Array.isArray(virtualElement.children)
     ? virtualElement.children
     : [virtualElement.children];
-  const keyGenerator = keyGeneratorFunction();
-  const childElements = virtualChildren.map((virtualElement) => {
-    const nextKey = keyGenerator.next().value!;
-    return createDomNode(virtualElement, element, nextKey.toString());
-  });
+  const childElements = virtualChildren
+    .map((virtualElement) => {
+      const nextKey = keyGenerator.next().value!;
+      return createDomNode(virtualElement, element, nextKey.toString());
+    })
+    .flat();
   element.replaceChildren(...childElements);
 
-  return element;
+  console.debug(element, virtualElement);
+
+  return [element];
 };
 
 /**
@@ -160,16 +185,17 @@ export const createOrUpdateRoot = (
   rootElement: Element,
 ): void => {
   const key = rootElement.getAttribute("jsx-key") ?? "0";
-  const domRoot = createDomNode(jsxNode, rootElement, key);
+  const domRootNodes = createDomNode(jsxNode, rootElement, key);
 
-  rootElement.appendChild(domRoot);
+  rootElement.replaceChildren(...domRootNodes);
 };
 
 /** Turns a raw parsed JSX object into a virtual element. */
 export const createVirtualElement = (
-  type: string | FunctionComponent,
+  type: ElementType,
   props: { type: string; children?: JsxChildren },
 ): VirtualElement<string> => {
+  console.debug(type, props);
   const { children, ...rest } = props;
   const tagName =
     typeof type === "function"
