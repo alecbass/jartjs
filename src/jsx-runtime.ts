@@ -132,6 +132,7 @@ const createDomNode = (
     // DOM elements will become children of its parent
     const fcResult = virtualElement.type({
       ...virtualElement.props,
+      // The rendered JSX needs to know of this component's children in case it uses them
       children: virtualElement.children,
     });
 
