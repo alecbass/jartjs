@@ -2,10 +2,10 @@
  * Types
  */
 
-type FunctionComponent = (props: unknown) => JsxNode;
+export type FunctionComponent<Props = unknown> = (props: Props) => JsxNode;
 
 /** Raw strings like "div", or a function component. */
-type ElementType = string | FunctionComponent;
+export type ElementType = string | FunctionComponent;
 
 /** A single JSX node. */
 export type JsxNode = string | number | VirtualElement<string>;
@@ -32,25 +32,23 @@ export interface VirtualElement<Key> {
   children: JsxChildren;
 }
 
+export type Fragment = VirtualElement<"fragment">;
+
 /** Normal HTML or SVG element props, with manual JSX ones pruned out. Children are handled explicitly. */
 type JsxProps<ElementTag> = Partial<Omit<ElementTag, "children" | "style">> &
   JsxChildrenProps;
 
+type HTMLElementIntrinsicElements = {
+  [Key in keyof HTMLElementTagNameMap]: JsxProps<HTMLElementTagNameMap[Key]>;
+};
+
+type SVGElementIntrinsicElements = {
+  [Key in keyof SVGElementTagNameMap]: JsxProps<SVGElementTagNameMap[Key]>;
+};
+
 declare global {
   export namespace JSX {
-    type HTMLElementIntrinsicElements = {
-      [Key in keyof HTMLElementTagNameMap]: JsxProps<
-        HTMLElementTagNameMap[Key]
-      >;
-    };
-
-    type SVGElementIntrinsicElements = {
-      [Key in keyof SVGElementTagNameMap]: JsxProps<SVGElementTagNameMap[Key]>;
-    };
-
-    type IntrinsicElements =
-      HTMLElementIntrinsicElements | SVGElementIntrinsicElements;
+    type IntrinsicElements = HTMLElementIntrinsicElements &
+      SVGElementIntrinsicElements;
   }
 }
-
-export type Fragment = VirtualElement<"fragment">;

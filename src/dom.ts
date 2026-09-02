@@ -1,0 +1,119 @@
+import { keyGeneratorFunction } from "./key";
+import type { JsxNode } from "./types";
+
+const applyProps = (element: Element, props: Record<string, unknown>): void => {
+  const { style, ...rest } = props;
+  Object.assign(element, rest);
+
+  if (element instanceof HTMLElement || element instanceof SVGElement) {
+    // Inline styles must be added via a props spread like `element.style = props.style`;
+    Object.assign(element.style, style);
+  }
+};
+
+const createOrUseExistingNode = (
+  key: string,
+  tagName: keyof HTMLElementTagNameMap,
+  parent: ParentNode,
+): Element => {
+  const existingChild = parent.querySelector(`[jsx-key="${key}"]`);
+
+  if (existingChild) {
+    return existingChild;
+  }
+
+  const newElement = document.createElement(tagName);
+  newElement.setAttribute("jsx-key", key);
+
+  return newElement;
+};
+
+/**
+ * Turns a single JSX element into a real DOM element, or text node.
+ * Recursively calls createRealNode on this element's children to create real DOM nodes from them too.
+ *
+ * @example
+ * createRealElement("hello"); === "hello" text node
+ * createRealElement(<div />); === HTMLDivElement instance
+ */
+const createDomNode = (
+  virtualElement: JsxNode,
+  parentNode: ParentNode,
+  key: string,
+): Node[] => {
+  if (virtualElement === null || virtualElement === undefined) {
+    return [];
+  }
+
+  const isNumberNode = typeof virtualElement === "number";
+
+  if (isNumberNode) {
+    return [document.createTextNode(virtualElement.toString())];
+  }
+
+  const isTextNode = typeof virtualElement === "string";
+
+  if (isTextNode) {
+    return [document.createTextNode(virtualElement)];
+  }
+
+  const keyGenerator = keyGeneratorFunction();
+  const isArray = Array.isArray(virtualElement);
+
+  if (isArray) {
+    return virtualElement.flatMap((e) => {
+      const nextKey = keyGenerator.next().value!;
+      return createDomNode(e, parentNode, nextKey.toString());
+    });
+  }
+
+  if (typeof virtualElement.type === "function") {
+    // Special case: render function component children. The component itself exists in the virtual DOM, but all real
+    // DOM elements will become children of its parent
+    const fcResult = virtualElement.type({
+      ...virtualElement.props,
+      // The rendered JSX needs to know of this component's children in case it uses them
+      children: virtualElement.children,
+    });
+
+    return createDomNode(fcResult, parentNode, "0");
+  }
+
+  const element = createOrUseExistingNode(
+    key,
+    virtualElement.tagName as keyof HTMLElementTagNameMap,
+    parentNode,
+  );
+
+  // Copy props over
+  applyProps(element, virtualElement.props);
+
+  //
+  // TODO(alec): Find the diff between new and existing elements, and update existing ones
+  //
+
+  const virtualChildren = Array.isArray(virtualElement.children)
+    ? virtualElement.children
+    : [virtualElement.children];
+  const childElements = virtualChildren.flatMap((virtualElement) => {
+    const nextKey = keyGenerator.next().value!;
+    return createDomNode(virtualElement, element, nextKey.toString());
+  });
+  element.replaceChildren(...childElements);
+
+  return [element];
+};
+
+/**
+ * Top-level function used to turn JSX into child nodes of a parent.
+ * Recursively goes through each JSX child element and adds it as a real DOM element as a child of rootElement, or updates an existing one in-place.
+ */
+export const createOrUpdateRoot = (
+  jsxNode: JsxNode,
+  rootElement: Element,
+): void => {
+  const key = rootElement.getAttribute("jsx-key") ?? "0";
+  const domRootNodes = createDomNode(jsxNode, rootElement, key);
+
+  rootElement.replaceChildren(...domRootNodes);
+};

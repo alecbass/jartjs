@@ -3,7 +3,7 @@ import heroImg from "./assets/hero.png";
 import typescriptLogo from "./assets/typescript.svg";
 import viteLogo from "./assets/vite.svg";
 import { setupCounter } from "./counter.ts";
-import { createOrUpdateRoot } from "./jsx-runtime.ts";
+import { createOrUpdateRoot } from "./dom.ts";
 import { Component } from "./Component.tsx";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `

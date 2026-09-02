@@ -1,4 +1,4 @@
-import type { JsxNode, JsxChildren } from "./jsx-runtime";
+import type { JsxNode, JsxChildren, FunctionComponent } from "./types";
 
 interface Props {
   title: string;
@@ -6,7 +6,11 @@ interface Props {
   renderLastChild: () => JsxNode;
 }
 
-export const Component = ({ title, children, renderLastChild }: Props) => (
+export const Component: FunctionComponent<Props> = ({
+  title,
+  children,
+  renderLastChild,
+}: Props) => (
   <div title={title}>
     <span>
       {children}
