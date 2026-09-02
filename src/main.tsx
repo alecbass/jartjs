@@ -98,6 +98,7 @@ createOrUpdateRoot(
     renderLastChild={() => <div>This is rendered by a prop function</div>}
   >
     yeah<span>Another</span>
+    <jart-component />
   </Component>,
   centerSection,
 );

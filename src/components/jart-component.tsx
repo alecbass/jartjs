@@ -53,3 +53,9 @@ export class JartComponent extends HTMLElement {
 }
 
 customElements.define("jart-component", JartComponent);
+
+declare global {
+  interface HTMLElementTagNameMap {
+    "jart-component": JartComponent;
+  }
+}
