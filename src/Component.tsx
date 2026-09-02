@@ -8,11 +8,10 @@ interface Props {
 
 export const Component = ({ title, children, renderLastChild }: Props) => (
   <div title={title}>
-    <div>Function component</div>
-    <span>Function span</span>
-    <div title="Children will render here">
-      <span> {children}</span>
-    </div>
+    <span>
+      {children}
+      <span>HEHE</span>
+    </span>
     {renderLastChild()}
   </div>
 );

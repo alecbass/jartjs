@@ -63,37 +63,40 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 setupCounter(document.querySelector<HTMLButtonElement>("#counter")!);
 
 const centerSection = document.querySelector("#center")!;
-
-const divJsx = (
-  <div
-    id="jsx-root"
-    title="Div"
-    className="parent"
-    style={{ display: "flex", color: "#FFFFFF" }}
-  >
-    First bit of text
-    <div title="Child" />
-    <div title="Second child">
-      <span
-        title="Second child element"
-        className="test"
-        style={{ color: "blue" }}
-      >
-        <span>Sub-Child of the second element</span>
-      </span>
-    </div>
-    Second bit of text
-  </div>
-);
-
-createOrUpdateRoot(divJsx, centerSection);
-createOrUpdateRoot(<div>Replaced child</div>, centerSection);
+// const divJsx = (
+//   <div
+//     id="jsx-root"
+//     title="Div"
+//     className="parent"
+//     style={{ display: "flex", color: "#FFFFFF" }}
+//   >
+//     First bit of text
+//     <div title="Child" />
+//     <div title="Second child">
+//       <span
+//         title="Second child element"
+//         className="test"
+//         style={{ color: "blue" }}
+//       >
+//         <span>Sub-Child of the second element</span>
+//       </span>
+//     </div>
+//     Second bit of text
+//   </div>
+// );
+// createOrUpdateRoot(divJsx, centerSection);
+// createOrUpdateRoot(
+//   <div>
+//     Replaced child<span>With a sibling</span>
+//   </div>,
+//   centerSection,
+// );
 createOrUpdateRoot(
   <Component
     title="Function component"
     renderLastChild={() => <div>This is rendered by a prop function</div>}
   >
-    yeah
+    yeah<span>Another</span>
   </Component>,
   centerSection,
 );

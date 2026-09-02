@@ -101,6 +101,10 @@ const createDomNode = (
   parentNode: ParentNode,
   key: string,
 ): Node[] => {
+  if (virtualElement === null || virtualElement === undefined) {
+    return [];
+  }
+
   const isNumberNode = typeof virtualElement === "number";
 
   if (isNumberNode) {
@@ -114,37 +118,24 @@ const createDomNode = (
   }
 
   const keyGenerator = keyGeneratorFunction();
+  const isArray = Array.isArray(virtualElement);
+
+  if (isArray) {
+    return virtualElement.flatMap((e) => {
+      const nextKey = keyGenerator.next().value!;
+      return createDomNode(e, parentNode, nextKey.toString());
+    });
+  }
 
   if (typeof virtualElement.type === "function") {
     // Special case: render function component children. The component itself exists in the virtual DOM, but all real
     // DOM elements will become children of its parent
-    const fcResult = virtualElement.type(
-      virtualElement.props,
-    ) as VirtualElement<"fc">;
-    const children = Array.isArray(fcResult.children)
-      ? fcResult.children
-      : [fcResult.children];
-
-    const childElements = children.flatMap((fcChild) => {
-      if (fcChild === undefined) {
-        // This is the `children` prop. I don't know if this actually will work long-term
-        const propChildren = Array.isArray(virtualElement.children)
-          ? virtualElement.children
-          : [virtualElement.children];
-
-        return propChildren.flatMap((c) => {
-          const nextKey = keyGenerator.next().value!;
-          return createDomNode(c, parentNode, nextKey.toString());
-        });
-      }
-      const nextKey = keyGenerator.next().value!;
-      return createDomNode(fcChild, parentNode, nextKey.toString());
+    const fcResult = virtualElement.type({
+      ...virtualElement.props,
+      children: virtualElement.children,
     });
 
-    // We don't replace children of an element here because there is no element to replace. The function component
-    // doesn't actually map to a real DOM element
-
-    return childElements;
+    return createDomNode(fcResult, parentNode, "0");
   }
 
   const element = createOrUseExistingNode(
@@ -163,15 +154,11 @@ const createDomNode = (
   const virtualChildren = Array.isArray(virtualElement.children)
     ? virtualElement.children
     : [virtualElement.children];
-  const childElements = virtualChildren
-    .map((virtualElement) => {
-      const nextKey = keyGenerator.next().value!;
-      return createDomNode(virtualElement, element, nextKey.toString());
-    })
-    .flat();
+  const childElements = virtualChildren.flatMap((virtualElement) => {
+    const nextKey = keyGenerator.next().value!;
+    return createDomNode(virtualElement, element, nextKey.toString());
+  });
   element.replaceChildren(...childElements);
-
-  console.debug(element, virtualElement);
 
   return [element];
 };
@@ -195,7 +182,6 @@ export const createVirtualElement = (
   type: ElementType,
   props: { type: string; children?: JsxChildren },
 ): VirtualElement<string> => {
-  console.debug(type, props);
   const { children, ...rest } = props;
   const tagName =
     typeof type === "function"
