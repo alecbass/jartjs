@@ -19,7 +19,6 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   </div>
 </section>
 
-<jart-component></jart-component>
 <button id="counter" type="button" class="counter"></button>
 
 <div class="ticks"></div>
@@ -98,7 +97,7 @@ createOrUpdateRoot(
     renderLastChild={() => <div>This is rendered by a prop function</div>}
   >
     yeah<span>Another</span>
-    <jart-component />
+    <jart-component name="Alec" />
   </Component>,
   centerSection,
 );

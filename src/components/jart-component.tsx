@@ -1,17 +1,20 @@
 import { createOrUpdateRoot } from "../dom";
 import type { JsxNode } from "../types";
 
-export class JartComponent extends HTMLElement {
+export class JartComponent<Props> extends HTMLElement {
   static observedAttributes = [];
 
-  constructor() {
+  constructor(props: Props) {
     // Always call super first in constructor
     super();
+    console.debug(props);
   }
 
   protected connectedCallback() {
     console.log("Custom element added to page.");
-    this.attachShadow({ mode: "open" });
+    if (!this.shadowRoot) {
+      this.attachShadow({ mode: "open" });
+    }
     this.update();
   }
 
@@ -56,6 +59,6 @@ customElements.define("jart-component", JartComponent);
 
 declare global {
   interface HTMLElementTagNameMap {
-    "jart-component": JartComponent;
+    "jart-component": JartComponent<{ name: string }> & { name: string };
   }
 }
