@@ -1,5 +1,5 @@
-import { keyGeneratorFunction } from "./key";
-import type { JsxNode } from "./types";
+import type { JsxNode } from "../types";
+import { keyGeneratorFunction } from "../utils";
 
 const applyProps = (element: Element, props: Record<string, unknown>): void => {
   const { style, ...rest } = props;

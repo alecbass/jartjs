@@ -1,4 +1,4 @@
-import type { JsxChildren, ElementType, VirtualElement } from "./types";
+import type { JsxChildren, ElementType, VirtualElement } from "../types";
 
 /** Turns a raw parsed JSX object into a virtual element. */
 export const createVirtualElement = (

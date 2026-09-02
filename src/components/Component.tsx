@@ -1,4 +1,4 @@
-import type { JsxNode, JsxChildren, FunctionComponent } from "./types";
+import type { JsxNode, JsxChildren, FunctionComponent } from "../types";
 
 interface Props {
   title: string;
