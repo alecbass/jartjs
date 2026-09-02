@@ -110,10 +110,13 @@ const createDomNode = (
  */
 export const createOrUpdateRoot = (
   jsxNode: JsxNode,
-  rootElement: Element,
+  rootNode: ParentNode,
 ): void => {
-  const key = rootElement.getAttribute("jsx-key") ?? "0";
-  const domRootNodes = createDomNode(jsxNode, rootElement, key);
+  const key =
+    rootNode instanceof Element
+      ? (rootNode.getAttribute("jsx-key") ?? "0")
+      : "0";
+  const domRootNodes = createDomNode(jsxNode, rootNode, key);
 
-  rootElement.replaceChildren(...domRootNodes);
+  rootNode.replaceChildren(...domRootNodes);
 };

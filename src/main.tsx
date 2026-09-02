@@ -19,6 +19,7 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   </div>
 </section>
 
+<jart-component></jart-component>
 <button id="counter" type="button" class="counter"></button>
 
 <div class="ticks"></div>
