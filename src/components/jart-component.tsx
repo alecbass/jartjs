@@ -4,8 +4,13 @@ import type { JsxNode } from "../types";
 export class JartComponent<Props, State> extends HTMLElement {
   static observedAttributes = [];
 
+  /** The current props value. */
   protected props: Props = {} as Props;
+
+  /** Initial state, should be implemented on a class-wide basis so every instance starts with this state. */
   protected initialState: State = {} as State;
+
+  /** The current state value. */
   protected state: State = {} as State;
 
   constructor() {
@@ -13,31 +18,18 @@ export class JartComponent<Props, State> extends HTMLElement {
     super();
   }
 
-  public setInitialProps(props: Props) {
+  /** This should not be overriden. It sets up the initial props and state values. */
+  public initialiseFromProps(props: Props) {
     this.props = props;
     this.state = { ...this.initialState };
   }
 
   protected connectedCallback() {
-    console.log("Custom element added to page.");
-
     if (!this.shadowRoot) {
       this.attachShadow({ mode: "open" });
     }
 
     this.update();
-  }
-
-  protected disconnectedCallback() {
-    console.log("Custom element removed from page.");
-  }
-
-  protected connectedMoveCallback() {
-    console.log("Custom element moved with moveBefore()");
-  }
-
-  protected adoptedCallback() {
-    console.log("Custom element moved to new page.");
   }
 
   protected attributeChangedCallback(

@@ -30,7 +30,7 @@ const createOrUseExistingNode = (
   if (newElement instanceof JartComponent) {
     // Generic components have generic props, which we don't know here. The compile-time type checking should catch
     // any issues
-    newElement.setInitialProps(props as any);
+    newElement.initialiseFromProps(props as any);
   }
 
   return newElement;
