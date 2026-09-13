@@ -96,7 +96,6 @@ createOrUpdateRoot(
     title="Function component"
     renderLastChild={() => <div>This is rendered by a prop function</div>}
   >
-    yeah<span>Another</span>
     <user-avatar userId={1} name="Alec" />
   </Component>,
   centerSection,
