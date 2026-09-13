@@ -97,6 +97,7 @@ createOrUpdateRoot(
     renderLastChild={() => <div>This is rendered by a prop function</div>}
   >
     <user-avatar userId={1} name="Alec" />
+    <user-avatar userId={2} name="Hendo" />
   </Component>,
   centerSection,
 );

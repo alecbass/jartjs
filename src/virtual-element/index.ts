@@ -11,8 +11,6 @@ export const createVirtualElement = (
       ? type.name
       : (type as keyof HTMLElementTagNameMap);
 
-  console.debug(type, typeof type, props);
-
   return {
     type,
     tagName,
