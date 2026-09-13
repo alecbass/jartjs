@@ -1,3 +1,4 @@
+import { JartComponent } from "../components";
 import type { JsxNode } from "../types";
 import { keyGeneratorFunction } from "../utils";
 
@@ -15,6 +16,7 @@ const createOrUseExistingNode = (
   key: string,
   tagName: keyof HTMLElementTagNameMap,
   parent: ParentNode,
+  props: Record<string, unknown>,
 ): Element => {
   const existingChild = parent.querySelector(`[jsx-key="${key}"]`);
 
@@ -24,6 +26,12 @@ const createOrUseExistingNode = (
 
   const newElement = document.createElement(tagName);
   newElement.setAttribute("jsx-key", key);
+
+  if (newElement instanceof JartComponent) {
+    // Generic components have generic props, which we don't know here. The compile-time type checking should catch
+    // any issues
+    newElement.setInitialProps(props as any);
+  }
 
   return newElement;
 };
@@ -83,6 +91,7 @@ const createDomNode = (
     key,
     virtualElement.tagName as keyof HTMLElementTagNameMap,
     parentNode,
+    virtualElement.props,
   );
 
   // Copy props over

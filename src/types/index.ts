@@ -2,6 +2,8 @@
  * Types
  */
 
+import type { JartComponent } from "../components";
+
 export type FunctionComponent<Props = unknown> = (props: Props) => JsxNode;
 
 /** Raw strings like "div", or a function component. */
@@ -39,7 +41,12 @@ type JsxProps<ElementTag> = Partial<Omit<ElementTag, "children" | "style">> &
   JsxChildrenProps;
 
 type HTMLElementIntrinsicElements = {
-  [Key in keyof HTMLElementTagNameMap]: JsxProps<HTMLElementTagNameMap[Key]>;
+  [
+    Key in keyof HTMLElementTagNameMap
+  ]: (HTMLElementTagNameMap[Key] extends JartComponent<infer Props, {}>
+    ? Props
+    : {}) &
+    JsxProps<HTMLElementTagNameMap[Key]>;
 };
 
 type SVGElementIntrinsicElements = {

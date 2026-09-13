@@ -1,20 +1,30 @@
 import { createOrUpdateRoot } from "../dom";
 import type { JsxNode } from "../types";
 
-export class JartComponent<Props> extends HTMLElement {
+export class JartComponent<Props, State> extends HTMLElement {
   static observedAttributes = [];
 
-  constructor(props: Props) {
+  protected props: Props = {} as Props;
+  protected initialState: State = {} as State;
+  protected state: State = {} as State;
+
+  constructor() {
     // Always call super first in constructor
     super();
-    console.debug(props);
+  }
+
+  public setInitialProps(props: Props) {
+    this.props = props;
+    this.state = { ...this.initialState };
   }
 
   protected connectedCallback() {
     console.log("Custom element added to page.");
+
     if (!this.shadowRoot) {
       this.attachShadow({ mode: "open" });
     }
+
     this.update();
   }
 
@@ -41,6 +51,11 @@ export class JartComponent<Props> extends HTMLElement {
     this.update();
   }
 
+  protected setState(state: Partial<State>): void {
+    this.state = { ...this.state, ...state };
+    this.update();
+  }
+
   private update() {
     if (!this.shadowRoot) {
       throw new Error("Tried to update JartJS element with no shadow root");
@@ -51,14 +66,6 @@ export class JartComponent<Props> extends HTMLElement {
   }
 
   protected render(): JsxNode {
-    return <div>Jart component</div>;
-  }
-}
-
-customElements.define("jart-component", JartComponent);
-
-declare global {
-  interface HTMLElementTagNameMap {
-    "jart-component": JartComponent<{ name: string }> & { name: string };
+    throw new Error("Jart components must implement a render() method.");
   }
 }
