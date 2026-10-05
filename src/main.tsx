@@ -3,7 +3,6 @@ import heroImg from "./assets/hero.png";
 import typescriptLogo from "./assets/typescript.svg";
 import viteLogo from "./assets/vite.svg";
 import { Component } from "./components";
-import { setupCounter } from "./counter.ts";
 import { createOrUpdateRoot } from "./dom";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
@@ -59,8 +58,6 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 <div class="ticks"></div>
 <section id="spacer"></section>
 `;
-
-setupCounter(document.querySelector<HTMLButtonElement>("#counter")!);
 
 const centerSection = document.querySelector("#center")!;
 const divJsx = (
