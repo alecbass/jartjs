@@ -2,7 +2,8 @@ import "./style.css";
 import heroImg from "./assets/hero.png";
 import typescriptLogo from "./assets/typescript.svg";
 import viteLogo from "./assets/vite.svg";
-import { Component } from "./components";
+import { ChildComponent, Component } from "./components";
+
 import { createOrUpdateRoot } from "./dom";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
@@ -95,6 +96,7 @@ createOrUpdateRoot(
   >
     <user-avatar userId={1} name="Alec" />
     <user-avatar userId={2} name="Hendo" />
+    <ChildComponent count={0} />
   </Component>,
   centerSection,
 );
