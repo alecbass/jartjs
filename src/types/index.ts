@@ -15,10 +15,12 @@ export type JsxNode = string | number | VirtualElement<string>;
 /** One or multiple JSX nodes that can be used as an element's children. */
 export type JsxChildren = JsxNode | JsxNode[];
 
-interface JsxChildrenProps {
+export interface JsxChildrenProps {
   /** Direct child text, a single JSX element or multiple JSX elements. */
   children?: JsxChildren;
+}
 
+export interface JsxStyleProps {
   /** Specific style override to allow partial style declarations. */
   style?: Partial<CSSStyleDeclaration>;
 }
@@ -37,10 +39,13 @@ export interface VirtualElement<Key> {
 export type Fragment = VirtualElement<"fragment">;
 
 /** Normal HTML or SVG element props, with manual JSX ones pruned out. Children are handled explicitly. */
-type JsxProps<ElementTag> = Partial<Omit<ElementTag, "children" | "style">> &
-  JsxChildrenProps;
+export type JsxProps<ElementTag> = Partial<
+  Omit<ElementTag, "children" | "style">
+> &
+  JsxChildrenProps &
+  JsxStyleProps;
 
-type HTMLElementIntrinsicElements = {
+export type HTMLElementIntrinsicElements = {
   [
     Key in keyof HTMLElementTagNameMap
   ]: (HTMLElementTagNameMap[Key] extends JartComponent<infer Props, {}>
@@ -49,7 +54,7 @@ type HTMLElementIntrinsicElements = {
     JsxProps<HTMLElementTagNameMap[Key]>;
 };
 
-type SVGElementIntrinsicElements = {
+export type SVGElementIntrinsicElements = {
   [Key in keyof SVGElementTagNameMap]: JsxProps<SVGElementTagNameMap[Key]>;
 };
 
