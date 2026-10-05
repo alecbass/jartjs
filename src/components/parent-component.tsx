@@ -2,21 +2,21 @@ import type { JsxNode } from "../types";
 import { component } from "./decorators";
 import { JartComponent } from "./jart-component";
 
-interface Props {
+interface State {
   count: number;
 }
 
 @component("child-component")
-export class ChildComponent extends JartComponent<Props, {}> {
+export class ParentComponent extends JartComponent<{}, State> {
   protected render(): JsxNode {
-    const { count } = this.props;
+    const { count } = this.state;
 
-    return <div>Count is {count}</div>;
+    return <child-component count={count} />;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "child-component": ChildComponent;
+    "parent-component": ParentComponent;
   }
 }

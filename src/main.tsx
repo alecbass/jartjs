@@ -19,8 +19,6 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   </div>
 </section>
 
-<button id="counter" type="button" class="counter"></button>
-
 <div class="ticks"></div>
 
 <section id="next-steps">
@@ -96,14 +94,7 @@ createOrUpdateRoot(
   >
     <user-avatar userId={1} name="Alec" />
     <user-avatar userId={2} name="Hendo" />
-    <ChildComponent count={0} />
+    <parent-component />
   </Component>,
   centerSection,
 );
-
-const button = document.querySelector("#counter")! as HTMLButtonElement;
-let clickCount = 0;
-
-button.addEventListener("click", () => {
-  createOrUpdateRoot(<div>Clicked {++clickCount} times</div>, centerSection);
-});
