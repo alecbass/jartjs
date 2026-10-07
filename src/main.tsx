@@ -2,8 +2,8 @@ import "./style.css";
 import heroImg from "./assets/hero.png";
 import typescriptLogo from "./assets/typescript.svg";
 import viteLogo from "./assets/vite.svg";
-import { Component } from "./components";
-import { setupCounter } from "./counter.ts";
+import { ChildComponent, Component } from "./components";
+
 import { createOrUpdateRoot } from "./dom";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
@@ -18,8 +18,6 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <p>Edit <code>src/main.tsx</code> and save to test <code>HMR</code></p>
   </div>
 </section>
-
-<button id="counter" type="button" class="counter"></button>
 
 <div class="ticks"></div>
 
@@ -60,8 +58,6 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 <section id="spacer"></section>
 `;
 
-setupCounter(document.querySelector<HTMLButtonElement>("#counter")!);
-
 const centerSection = document.querySelector("#center")!;
 const divJsx = (
   <div
@@ -96,14 +92,7 @@ createOrUpdateRoot(
     title="Function component"
     renderLastChild={() => <div>This is rendered by a prop function</div>}
   >
-    yeah<span>Another</span>
+    <parent-component />
   </Component>,
   centerSection,
 );
-
-const button = document.querySelector("#counter")! as HTMLButtonElement;
-let clickCount = 0;
-
-button.addEventListener("click", () => {
-  createOrUpdateRoot(<div>Clicked {++clickCount} times</div>, centerSection);
-});

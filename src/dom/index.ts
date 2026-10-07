@@ -1,5 +1,5 @@
+import { JartComponent } from "../components";
 import type { JsxNode } from "../types";
-import { keyGeneratorFunction } from "../utils";
 
 const applyProps = (element: Element, props: Record<string, unknown>): void => {
   const { style, ...rest } = props;
@@ -12,18 +12,16 @@ const applyProps = (element: Element, props: Record<string, unknown>): void => {
 };
 
 const createOrUseExistingNode = (
-  key: string,
   tagName: keyof HTMLElementTagNameMap,
-  parent: ParentNode,
+  props: Record<string, unknown>,
 ): Element => {
-  const existingChild = parent.querySelector(`[jsx-key="${key}"]`);
-
-  if (existingChild) {
-    return existingChild;
-  }
-
   const newElement = document.createElement(tagName);
-  newElement.setAttribute("jsx-key", key);
+
+  if (newElement instanceof JartComponent) {
+    // Generic components have generic props, which we don't know here. The compile-time type checking should catch
+    // any issues
+    newElement.initialiseFromProps(props as any);
+  }
 
   return newElement;
 };
@@ -39,7 +37,6 @@ const createOrUseExistingNode = (
 const createDomNode = (
   virtualElement: JsxNode,
   parentNode: ParentNode,
-  key: string,
 ): Node[] => {
   if (virtualElement === null || virtualElement === undefined) {
     return [];
@@ -57,14 +54,10 @@ const createDomNode = (
     return [document.createTextNode(virtualElement)];
   }
 
-  const keyGenerator = keyGeneratorFunction();
   const isArray = Array.isArray(virtualElement);
 
   if (isArray) {
-    return virtualElement.flatMap((e) => {
-      const nextKey = keyGenerator.next().value!;
-      return createDomNode(e, parentNode, nextKey.toString());
-    });
+    return virtualElement.flatMap((e) => createDomNode(e, parentNode));
   }
 
   if (typeof virtualElement.type === "function") {
@@ -76,13 +69,12 @@ const createDomNode = (
       children: virtualElement.children,
     });
 
-    return createDomNode(fcResult, parentNode, "0");
+    return createDomNode(fcResult, parentNode);
   }
 
   const element = createOrUseExistingNode(
-    key,
     virtualElement.tagName as keyof HTMLElementTagNameMap,
-    parentNode,
+    virtualElement.props,
   );
 
   // Copy props over
@@ -95,10 +87,9 @@ const createDomNode = (
   const virtualChildren = Array.isArray(virtualElement.children)
     ? virtualElement.children
     : [virtualElement.children];
-  const childElements = virtualChildren.flatMap((virtualElement) => {
-    const nextKey = keyGenerator.next().value!;
-    return createDomNode(virtualElement, element, nextKey.toString());
-  });
+  const childElements = virtualChildren.flatMap((virtualElement) =>
+    createDomNode(virtualElement, element),
+  );
   element.replaceChildren(...childElements);
 
   return [element];
@@ -110,10 +101,9 @@ const createDomNode = (
  */
 export const createOrUpdateRoot = (
   jsxNode: JsxNode,
-  rootElement: Element,
+  rootNode: ParentNode,
 ): void => {
-  const key = rootElement.getAttribute("jsx-key") ?? "0";
-  const domRootNodes = createDomNode(jsxNode, rootElement, key);
+  const domRootNodes = createDomNode(jsxNode, rootNode);
 
-  rootElement.replaceChildren(...domRootNodes);
+  rootNode.replaceChildren(...domRootNodes);
 };
